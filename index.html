@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Drive API Quickstart</title>
+    <meta charset='utf-8' />
+    
+  </head>
+  <body>
+    <p>Drive API Quickstart</p>
+
+    
+    <div id="app">
+      <!--Add buttons to initiate auth sequence and sign out-->
+      <button id="authorize-button" style="display: none;">Authorize</button>
+      <button id="signout-button" style="display: none;">Sign Out</button>
+      <button @click="listFiles()" >List files</button>
+      <hr>
+      <table border="1">
+        <tr v-for="file in files">
+          <td>{{file.name}}</td>
+          <td>{{file.mimeType}}</td>
+          <td><button type="button" @click="viewFile(file.id)">View</button></td>
+        </tr>
+      </table>
+      <pre id=viewer></pre>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script type="text/javascript" src="drive.config.js"></script>
+    <script type="text/javascript" src="drive.js"></script>
+    <script type="text/javascript">
+
+    function htmlEncode( html ) {
+        return document.createElement( 'a' ).appendChild( 
+            document.createTextNode( html ) ).parentNode.innerHTML;
+    };
+      var app = new Vue({
+        el: '#app',
+        data: {
+          files:[],
+          logged:false,
+        },
+        methods:{
+          listFiles:function(){
+            this.gDrive.listFiles(this.receiveFiles);
+          },
+          receiveFiles:function(files){
+            console.log(files);
+            this.files=files;
+          },
+          viewFile:function(id){
+            this.gDrive.getFileInfo(id,this.getFile);
+            
+          },
+          getFile:function(info){
+            console.log(info);
+            var parts=info.mimeType.split("/");
+            var func=this.showContent;
+            if (parts[0]=="image"){
+              func=this.showImage;
+            }
+            this.gDrive.getFile(info.id,func,info);
+          },
+          showContent:function(content,info){
+            console.log(info);
+            document.getElementById("viewer").innerHTML=htmlEncode(content);
+          },
+          showImage:function(content,info){
+            var data64=(btoa(content));
+            var img=document.createElement("img");
+            img.attr("src","data:"+info.mimeType+";base64, "+data64);
+            document.getElementById("viewer").innerHTML='';
+            
+          },
+          fileIcon:function(type){
+            var parts=type.split("/");
+            var icons={
+              "text":""
+            }
+          }
+        }
+      })   
+    </script>
+    <script async defer src="https://apis.google.com/js/api.js"
+      onload="this.onload=function(){};app.gDrive=new driveHelper()"
+      onreadystatechange="if (this.readyState === 'complete') this.onload()">
+    </script>
+
+    
+  </body>
+</html>
