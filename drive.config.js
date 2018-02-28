@@ -1,3 +1,5 @@
+// Go to https://console.developers.google.com/apis/credentials
+
 // Client ID and API key from the Developer Console
 var CLIENT_ID = 'YOURCLIENTID';
 var API_KEY = 'YOURAPIKEY';
